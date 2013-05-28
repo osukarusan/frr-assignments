@@ -50,12 +50,16 @@ void RenderSSAO::paintGL()
 
     programFirst.setUniformValue("znear", pglwidget->camera()->getZnear());
     programFirst.setUniformValue("zfar",  pglwidget->camera()->getZfar());
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     if (pdrawPlugin)
         pdrawPlugin->drawScene();
 
     programFirst.release();
+
+    GLfloat projmat[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, projmat);
+
 
     // second pass: compute SSAO factor
     Vector fc[8];
@@ -74,9 +78,6 @@ void RenderSSAO::paintGL()
     glPushMatrix();
     glLoadIdentity();
 
-    GLfloat projMatrix[16];
-    glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
-
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, normaldepthTexture);
@@ -89,8 +90,13 @@ void RenderSSAO::paintGL()
     programSSAO.setUniformValue("rotationRepetitions", pglwidget->width()/4.0f, pglwidget->height()/4.0f);
     programSSAO.setUniformValue("texelSize", 1.0f/pglwidget->width(), 1.0f/pglwidget->height());
     switch (sampleMode) {
-        case WORLD_SPACE:  programSSAO.setUniformValue("radius", sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
-                           programSSAO.setUniformValue("projectionMatrix", QMatrix4x4((qreal*)projMatrix));
+        case WORLD_SPACE:  programSSAO.setUniformValue("radius", 0.5f*sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
+                           programSSAO.setUniformValue("zfar",pglwidget->camera()->getZfar());
+                           programSSAO.setUniformValue("projectionMatrix",
+                                                        QMatrix4x4( projmat[0], projmat[4], projmat[8],  projmat[12],
+                                                                    projmat[1], projmat[5], projmat[9],  projmat[13],
+                                                                    projmat[2], projmat[6], projmat[10], projmat[14],
+                                                                    projmat[3], projmat[7], projmat[11], projmat[15]));
                            break;
         case SCREEN_SPACE: programSSAO.setUniformValue("radius", 32.0f*sampleRadiusSize); break;
         default:           programSSAO.setUniformValue("radius", 1.0f); break;

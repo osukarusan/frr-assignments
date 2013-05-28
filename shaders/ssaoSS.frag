@@ -4,7 +4,7 @@ const int NUMSAMPLES = 16;
 const int TEX_DEFERRED = 0;
 const int TEX_ROTATION = 1;
 const float PI = 3.14159265;
-const float EPSILON = 0.01;
+const float EPSILON = 0.005;
 
 uniform sampler2D normalsDepth;
 uniform sampler2D rotationPattern;
@@ -24,7 +24,7 @@ void main(void)
     mat2x2 rotation = mat2x2(cosa, -sina, cosa, sina);
 
     float accum = 0.0;
-    if (depth > 0.0) {
+    if (depth < 1.0) {
         for (int i = 0; i < NUMSAMPLES; i++) {
             vec2 offset = samplingPattern[i].xy;
             offset = rotation*offset;
