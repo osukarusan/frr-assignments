@@ -14,5 +14,11 @@ FORMS += \
 OTHER_FILES += \
     ../../shaders/firstPass.vert \
     ../../shaders/firstPass.frag \
-    ../../shaders/ssao.vert \
-    ../../shaders/ssao.frag
+    ../../shaders/ssaoWS.frag \
+    ../../shaders/ssaoWS.vert \
+    ../../shaders/ssaoSS.vert \
+    ../../shaders/ssaoSS.frag \
+    ../../shaders/filterGauss.frag \
+    ../../shaders/filterBilateral.frag \
+    ../../shaders/filterNone.frag \
+    ../../shaders/filter.vert

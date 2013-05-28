@@ -21,7 +21,7 @@ public:
     void getAngles(float& ax, float& ay, float& az) const;
     void setAngles(float ax, float ay, float az);
 
-	float getAspectRatio() const;
+    float getAspectRatio() const;
     void setAspectRatio(float ar);
 
     void updateClippingPlanes(const Box&);
@@ -35,6 +35,11 @@ public:
     void rotateLocal(const Vector& angles);
 
     Frustum getFrustum() const;
+    void getFrustumCorners(Vector corners[8]) const;
+    void getFrustumCornersEyeSpace(Vector corners[8]) const;
+
+    float getZnear() const;
+    float getZfar() const;
 
 private:
      // parametres de la camera
@@ -49,7 +54,17 @@ private:
 
 inline float Camera::getAspectRatio() const
 {
-	return paspectRatio;
+    return paspectRatio;
+}
+
+inline float Camera::getZnear() const
+{
+    return pzNear;
+}
+
+inline float Camera::getZfar() const
+{
+    return pzFar;
 }
 
 #endif

@@ -14,7 +14,13 @@ class RenderSSAO : public QObject, public RenderInterface
 
 public:
 
+    enum SampleMode { WORLD_SPACE, SCREEN_SPACE };
+    enum FilterMode { NO_FILTER, GAUSSIAN_BLUR, BILATERAL_BLUR };
+
     RenderSSAO();
+    ~ RenderSSAO();
+
+    virtual void onPluginLoad();
 
     virtual void initGL();
     virtual void paintGL();
@@ -23,16 +29,37 @@ public:
     virtual QWidget* getPluginWidget() { return widget; }
     virtual QString  getPluginName() { return "SSAO"; }
 
+public slots:
+
+    void setSampleMode(SampleMode sm);
+    void setSampleRadiusSize(float r);
+    void setFilterMode(FilterMode fm);
+    void setFilterRadiusSize(float r);
+    void reloadShaders();
+
 private:
 
-    GLuint normaldepthTexture;
-    GLuint depthRenderBuffer;
-    GLuint frameBuffer;
+    void generateSamplingPattern();
+    void generateRotationPattern();
 
-    RenderSSAOWidget* widget;
+    GLuint normaldepthTexture, aoTexture;
+    GLuint depthRenderBuffer;
+    GLuint frameBuffer1, frameBuffer2;
+
+    QVector3D samplingPattern[16];
+    GLuint samplingPatternTexture;
+    GLuint rotationPatternTexture;
 
     QGLShaderProgram programFirst;
     QGLShaderProgram programSSAO;
+    QGLShaderProgram programFilter;
+
+    SampleMode sampleMode;
+    float      sampleRadiusSize;
+    FilterMode filterMode;
+    float      filterRadiusSize;
+
+    RenderSSAOWidget* widget;
 
 };
  

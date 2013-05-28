@@ -160,3 +160,72 @@ Frustum Camera::getFrustum() const {
     f.setParams(getObs(), pvrp, vup, paspectRatio, pfovy, pzNear, pzFar);
     return f;
 }
+
+void Camera::getFrustumCorners(Vector corners[8]) const {
+
+    // Calculem el sistema de referencia de la camera
+    Vector obs  = Vector(getObs());
+    Vector zCam = Vector(getObs()) - Vector(pvrp);
+    zCam.normalize();
+    Vector sup = abs(zCam.y() > 0.95) ? Vector(0, 0, 1) : Vector(0, 1, 0);
+    Vector xCam = sup ^ zCam;
+    xCam.normalize();
+    Vector yCam = zCam ^ xCam;
+    yCam.normalize();
+
+    // Calculem l'alcada i l'amplada dels plans de retallat
+    float hNear = 2 * tan(DEG2RAD*pfovy/2) * pzNear;
+    float hFar  = 2 * tan(DEG2RAD*pfovy/2) * pzFar;
+    float wNear = hNear * paspectRatio;
+    float wFar  = hFar  * paspectRatio;
+
+    // Calculem el centre del pla i els extrems
+    Point nc  = obs - zCam * pzNear;
+    Point fc  = obs - zCam * pzFar;
+    Point ftl = fc + (yCam * hFar/2)  - (xCam * wFar/2);
+    Point ftr = fc + (yCam * hFar/2)  + (xCam * wFar/2);
+    Point fbl = fc - (yCam * hFar/2)  - (xCam * wFar/2);
+    Point fbr = fc - (yCam * hFar/2)  + (xCam * wFar/2);
+    Point ntl = nc + (yCam * hNear/2) - (xCam * wNear/2);
+    Point ntr = nc + (yCam * hNear/2) + (xCam * wNear/2);
+    Point nbl = nc - (yCam * hNear/2) - (xCam * wNear/2);
+    Point nbr = nc - (yCam * hNear/2) + (xCam * wNear/2);
+
+    corners[0] = nbl;
+    corners[1] = nbr;
+    corners[2] = ntr;
+    corners[3] = ntl;
+    corners[4] = fbl;
+    corners[5] = fbr;
+    corners[6] = ftr;
+    corners[7] = ftl;
+
+}
+
+
+void Camera::getFrustumCornersEyeSpace(Vector corners[8]) const {
+
+    float hNear = 2 * tan(DEG2RAD*pfovy/2) * pzNear;
+    float hFar  = 2 * tan(DEG2RAD*pfovy/2) * pzFar;
+    float wNear = hNear * paspectRatio;
+    float wFar  = hFar  * paspectRatio;
+
+    Point ftl = Point(-wFar /2,  hFar /2,  pzFar);
+    Point ftr = Point( wFar /2,  hFar /2,  pzFar);
+    Point fbl = Point(-wFar /2, -hFar /2,  pzFar);
+    Point fbr = Point( wFar /2, -hFar /2,  pzFar);
+    Point ntl = Point(-wNear/2,  hNear/2, pzNear);
+    Point ntr = Point( wNear/2,  hNear/2, pzNear);
+    Point nbl = Point(-wNear/2, -hNear/2, pzNear);
+    Point nbr = Point( wNear/2, -hNear/2, pzNear);
+
+    corners[0] = nbl;
+    corners[1] = nbr;
+    corners[2] = ntr;
+    corners[3] = ntl;
+    corners[4] = fbl;
+    corners[5] = fbr;
+    corners[6] = ftr;
+    corners[7] = ftl;
+
+}
