@@ -74,20 +74,25 @@ void RenderSSAO::paintGL()
     glPushMatrix();
     glLoadIdentity();
 
+    GLfloat projMatrix[16];
+    glGetFloatv(GL_PROJECTION_MATRIX, projMatrix);
+
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, normaldepthTexture);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, rotationPatternTexture);
 
-    programSSAO.setUniformValue("texture", 0);
+    programSSAO.setUniformValue("normalsDepth", 0);
     programSSAO.setUniformValue("rotationPattern", 1);
     programSSAO.setUniformValueArray("samplingPattern", samplingPattern, 16);
     programSSAO.setUniformValue("rotationRepetitions", pglwidget->width()/4.0f, pglwidget->height()/4.0f);
     programSSAO.setUniformValue("texelSize", 1.0f/pglwidget->width(), 1.0f/pglwidget->height());
     switch (sampleMode) {
-        case WORLD_SPACE:  programSSAO.setUniformValue("radius", sampleRadiusSize*pglwidget->scene()->boundingBox().radius()); break;
-        case SCREEN_SPACE: programSSAO.setUniformValue("radius", sampleRadiusSize); break;
+        case WORLD_SPACE:  programSSAO.setUniformValue("radius", sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
+                           programSSAO.setUniformValue("projectionMatrix", QMatrix4x4((qreal*)projMatrix));
+                           break;
+        case SCREEN_SPACE: programSSAO.setUniformValue("radius", 32.0f*sampleRadiusSize); break;
         default:           programSSAO.setUniformValue("radius", 1.0f); break;
     }
 
