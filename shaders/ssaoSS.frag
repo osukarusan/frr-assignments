@@ -4,7 +4,7 @@ const int NUMSAMPLES = 16;
 const int TEX_DEFERRED = 0;
 const int TEX_ROTATION = 1;
 const float PI = 3.14159265;
-const float EPSILON = 0.005;
+const float EPSILON = 0.003;
 
 uniform sampler2D normalsDepth;
 uniform sampler2D rotationPattern;

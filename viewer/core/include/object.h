@@ -22,9 +22,11 @@ public:
     vector<Vertex>& vertices();  // retorna una referencia al vector de vertexs de l'objecte
                                  // IMPORTANT: si modifiqueu algun vertex, cal que després crideu computeNormals() i computeBoundingBox
     
-    void computeNormals();     // re-calcula només les normals *per-cara*
+    void computeNormals();     // re-calcula nomes les normals *per-cara*
     void computeVertexNormals(); // recalcula les normals fent la mitjana de les cares
     void computeBoundingBox(); // calcula la capsa
+
+    void computeVertexNormalsPerFace();
 
     void setPosition(const Point& p); // p passa a ser la posicio del centre
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdio>
 #include "scene.h"
+#include "face.h"
 
 using namespace std;
 
@@ -46,6 +47,24 @@ void Object::computeVertexNormals()
         normals[i].normalize();
         pvertices[i].setNormal(normals[i]);
     }
+}
+
+void Object::computeVertexNormalsPerFace()
+{
+    this->computeNormals();
+    std::vector<Vertex> newverts;
+    int vc = 0;
+    for (unsigned int i = 0; i < pfaces.size(); i++) {
+        Face& f = pfaces[i];
+        for (int j = 0; j < f.numVertices(); j++) {
+            int vid = f.vertexIndex(j);
+            newverts.push_back(pvertices[vid]);
+            newverts[vc].setNormal(f.normal());
+            f.setVertexIndex(j, vc);
+            vc++;
+        }
+    }
+    pvertices = newverts;
 }
 
 

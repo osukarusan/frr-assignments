@@ -90,7 +90,7 @@ void RenderSSAO::paintGL()
     programSSAO.setUniformValue("rotationRepetitions", pglwidget->width()/4.0f, pglwidget->height()/4.0f);
     programSSAO.setUniformValue("texelSize", 1.0f/pglwidget->width(), 1.0f/pglwidget->height());
     switch (sampleMode) {
-        case WORLD_SPACE:  programSSAO.setUniformValue("radius", 0.5f*sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
+        case WORLD_SPACE:  programSSAO.setUniformValue("radius", 0.25f*sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
                            programSSAO.setUniformValue("zfar",pglwidget->camera()->getZfar());
                            programSSAO.setUniformValue("projectionMatrix",
                                                         QMatrix4x4( projmat[0], projmat[4], projmat[8],  projmat[12],

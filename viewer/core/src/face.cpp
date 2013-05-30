@@ -66,3 +66,9 @@ Vector Face::normal() const
 {
     return pnormal;
 }
+
+void Face::setVertexIndex(unsigned int i, int index)
+{
+    if (i < pvertices.size())
+        pvertices[i] = index;
+}

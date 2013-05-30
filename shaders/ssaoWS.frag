@@ -5,7 +5,7 @@ const int TEX_DEFERRED = 0;
 const int TEX_ROTATION = 1;
 const int TEX_RAYDIR   = 2;
 const float PI = 3.14159265;
-const float EPSILON = 0.005;
+const float EPSILON = 0.025;
 
 uniform sampler2D normalsDepth;
 uniform sampler2D rotationPattern;
@@ -21,7 +21,8 @@ void main(void)
     vec2  texpos   = gl_TexCoord[TEX_DEFERRED].xy;
     vec4  texdef   = texture2D(normalsDepth, texpos);
     float depth    = texdef.a;
-    vec3  normal   = 2.0*texdef.rgb - 1.0;
+
+    vec3  normal   = normalize(2.0*texdef.rgb - 1.0);
     vec3  esCenter = depth*gl_TexCoord[TEX_RAYDIR].xyz;
 
     float angle    = 2.0*PI*texture2D(rotationPattern, gl_TexCoord[TEX_ROTATION].xy).r;
@@ -32,10 +33,14 @@ void main(void)
 
     float occlusion = 0.0;
     if (depth < 1.0) {
+
         for (int i = 0; i < NUMSAMPLES; i++) {
             // get point from sampling pattern rotated
             vec3 esSample = samplingPattern[i];
             esSample = radius*tbnMatrix*esSample + esCenter;
+
+            if (dot(esSample, normal) < 0)
+                esSample = -esSample;
 
             // project point to screen space
             vec4 cspos = projectionMatrix * vec4(esSample.xy, -esSample.z, 1.0);
@@ -43,10 +48,10 @@ void main(void)
 
             // get depth and compare
             float ssdepth      = zfar*texture2D(normalsDepth, sspos).a;
-            float insideRadius = abs(esCenter.z - ssdepth) < radius ? 1.0 : 0.0;
+            float insideRadius = abs(esCenter.z - ssdepth) < radius ? 1.0 : 1.0; //i disabled this on purpose
 
             // consider occluders only inside the radius
-            occlusion += insideRadius * (ssdepth < esSample.z - EPSILON*zfar ? 1.0 : 0.0);
+            occlusion += insideRadius * (ssdepth < esSample.z - zfar*EPSILON ? 1.0 : 0.0);
         }
         occlusion /= float(NUMSAMPLES);
     }
@@ -55,4 +60,5 @@ void main(void)
     }
 
     gl_FragColor = vec4(1.0 - vec3(occlusion), 1.0);
+
 }

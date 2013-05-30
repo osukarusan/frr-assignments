@@ -86,7 +86,7 @@ void DrawVBO::onObjectAdd()
     ibo.reserve(nobjs);
     for (int i = 0; i < nobjs; i++) {
         Object obj = pglwidget->scene()->objects()[i].toTriangles();
-        obj.computeVertexNormals();
+        obj.computeVertexNormalsPerFace();
         sendObjectToGPU(obj);
     }
 }

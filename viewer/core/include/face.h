@@ -24,6 +24,7 @@ public:
     void addVertexIndex(int i);       // afegeix un vertex (index) a la cara
     void setMaterialIndex(int materialIndex);
     void computeNormal(const vector<Vertex> &);
+    void setVertexIndex(unsigned int i, int index);
 
 private:
     // atributs
