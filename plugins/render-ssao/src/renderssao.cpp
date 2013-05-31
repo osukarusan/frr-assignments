@@ -138,10 +138,17 @@ void RenderSSAO::paintGL()
     glEnable(GL_TEXTURE_2D);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, aoTexture);
+
     programFilter.setUniformValue("texture", 0);
     if (filterMode != NO_FILTER) {
         programFilter.setUniformValue("radius", filterRadiusSize);
         programFilter.setUniformValue("texelSize", 1.0f/pglwidget->width(), 1.0f/pglwidget->height());
+        if (filterMode == BILATERAL_BLUR) {
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normaldepthTexture);
+            programFilter.setUniformValue("normalsDepth", 1);
+            glActiveTexture(GL_TEXTURE0);
+        }
     }
 
     glBegin(GL_QUADS);
@@ -278,7 +285,7 @@ void RenderSSAO::setSampleRadiusSize(float r) {
 }
 
 void RenderSSAO::setFilterRadiusSize(float r) {
-    filterRadiusSize = 3.0f*r;
+    filterRadiusSize = 5.0f*r;
 }
 
 void RenderSSAO::setFilterMode(FilterMode fm) {
