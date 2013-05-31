@@ -18,17 +18,21 @@ void main(void)
     vec2  texpos = gl_TexCoord[TEX_DEFERRED].xy;
     float depth  = texture2D(normalsDepth, texpos).a;
 
-    float angle     = 2.0*PI*texture2D(rotationPattern, gl_TexCoord[TEX_ROTATION].xy).r;
-    float sina      = sin(angle);
-    float cosa      = cos(angle);
-    mat2x2 rotation = mat2x2(cosa, -sina, cosa, sina);
-
     float accum = 0.0;
     if (depth < 1.0) {
+
+        float angle     = 2.0*PI*texture2D(rotationPattern, gl_TexCoord[TEX_ROTATION].xy).r;
+        float sina      = sin(angle);
+        float cosa      = cos(angle);
+        mat2x2 rotation = mat2x2(cosa, -sina, cosa, sina);
+
+        float depthRadius = radius/depth;
+
         for (int i = 0; i < NUMSAMPLES; i++) {
+            // take samples directly around screen space location
             vec2 offset = samplingPattern[i].xy;
             offset = rotation*offset;
-            offset = radius*texelSize*offset;
+            offset = depthRadius*texelSize*offset;
 
             float sampleDepth = texture2D(normalsDepth, texpos + offset).a;
             if (sampleDepth >= depth - EPSILON) {
@@ -42,7 +46,5 @@ void main(void)
     }
 
     gl_FragColor = vec4(accum, accum, accum, 1.0);
-
-
 
 }

@@ -11,7 +11,7 @@ float Gaussian2D(float x, float y) {
 }
 
 float DepthFun(float x) {
-    return 1.0 - sqrt(x);
+    return max(0.0, 1.0 - sqrt(10.0*x));
 }
 
 void main(void) {

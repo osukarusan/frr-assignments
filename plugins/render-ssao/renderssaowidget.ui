@@ -10,6 +10,12 @@
     <height>592</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -26,10 +32,10 @@
       <item>
        <widget class="QRadioButton" name="rbSampleWorld">
         <property name="text">
-         <string>Eye space ball, projected</string>
+         <string>Eye space ball</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -37,6 +43,9 @@
        <widget class="QRadioButton" name="rbSampleScreen">
         <property name="text">
          <string>Screen space disk</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -56,6 +65,9 @@
       <widget class="QSlider" name="slSampleRadius">
        <property name="maximum">
         <number>100</number>
+       </property>
+       <property name="value">
+        <number>50</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -92,7 +104,7 @@
          <string>None</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -107,6 +119,9 @@
        <widget class="QRadioButton" name="rbFilterBilateral">
         <property name="text">
          <string>Bilateral</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -126,6 +141,9 @@
       <widget class="QSlider" name="slFilterRadius">
        <property name="maximum">
         <number>100</number>
+       </property>
+       <property name="value">
+        <number>50</number>
        </property>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

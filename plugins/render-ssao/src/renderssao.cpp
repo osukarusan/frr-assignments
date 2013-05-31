@@ -12,10 +12,10 @@ RenderSSAO::RenderSSAO()
     frameBuffer1 = 0;
     frameBuffer2 = 0;
 
-    sampleMode = WORLD_SPACE;
-    filterMode = NO_FILTER;
-    sampleRadiusSize = 0.1f;
-    filterRadiusSize = 1.0f;
+    sampleMode = SCREEN_SPACE;
+    filterMode = BILATERAL_BLUR;
+    sampleRadiusSize = 0.5f;
+    filterRadiusSize = 2.5f;
 }
 
 RenderSSAO::~RenderSSAO() {
@@ -220,8 +220,6 @@ void RenderSSAO::resizeGL(int width, int height)
     }
 
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-
-
 }
 
 
