@@ -57,6 +57,10 @@ void RenderSSAOWidget::on_slFilterRadius_valueChanged(int i) {
     renderer->setFilterRadiusSize(i/100.0f);
 }
 
+void RenderSSAOWidget::on_slExtinctionCoeff_valueChanged(int i) {
+    renderer->setExtinctionCoefficient(i/100.0f);
+}
+
 void RenderSSAOWidget::on_slSampleRadius_valueChanged(int i) {
     renderer->setSampleRadiusSize(i/100.0f);
 }

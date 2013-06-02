@@ -6,6 +6,8 @@
 #include "renderssaowidget.h"
 #include <QGLShaderProgram>
 
+#define NUM_SAMPLES 16
+
 
 class RenderSSAO : public QObject, public RenderInterface
 {
@@ -33,6 +35,7 @@ public slots:
 
     void setSampleMode(SampleMode sm);
     void setSampleRadiusSize(float r);
+    void setExtinctionCoefficient(float c);
     void setFilterMode(FilterMode fm);
     void setFilterRadiusSize(float r);
     void reloadShaders();
@@ -46,7 +49,7 @@ private:
     GLuint depthRenderBuffer;
     GLuint frameBuffer1, frameBuffer2;
 
-    QVector3D samplingPattern[16];
+    QVector3D samplingPattern[NUM_SAMPLES];
     GLuint samplingPatternTexture;
     GLuint rotationPatternTexture;
 
@@ -56,6 +59,7 @@ private:
 
     SampleMode sampleMode;
     float      sampleRadiusSize;
+    float      extinctionCoeff;
     FilterMode filterMode;
     float      filterRadiusSize;
 

@@ -11,7 +11,7 @@ float Gaussian2D(float x, float y) {
 }
 
 float DepthFun(float x) {
-    return max(0.0, 1.0 - sqrt(10.0*x));
+    return max(0.1, 1.0 - sqrt(100.0*x));
 }
 
 void main(void) {
@@ -21,9 +21,6 @@ void main(void) {
     vec2  center = gl_TexCoord[0].xy;
     float cdepth = texture2D(normalsDepth, center).a;
 
-    float dwsum = 0.0;
-    float dwcnt = 0.0;
-
     for (float i = -radius; i <= radius; i += 1.0) {
         for (float j = -radius; j <= radius; j += 1.0) {
             vec2  psample = gl_TexCoord[0].xy + texelSize*vec2(i, j);
@@ -31,9 +28,6 @@ void main(void) {
             float dweight = DepthFun(abs(cdepth - texture2D(normalsDepth, psample).a));
             wsum  += gweight*dweight;
             color += gweight*dweight*texture2D(texture, psample);
-
-            dwsum += dweight;
-            dwcnt += 1.0;
         }
     }
 

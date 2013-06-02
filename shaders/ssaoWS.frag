@@ -14,6 +14,7 @@ uniform vec3      samplingPattern[NUMSAMPLES];
 uniform mat4      projectionMatrix;
 uniform vec2      texelSize;
 uniform float     radius;
+uniform float     fadeoff;
 uniform float     zfar;
 
 void main(void)
@@ -27,8 +28,7 @@ void main(void)
 
         vec3  normal    = normalize(2.0*texdef.rgb - 1.0);
         vec3  esCenter  = depth*gl_TexCoord[TEX_RAYDIR].xyz;
-        float angle     = 2.0*PI*texture2D(rotationPattern, gl_TexCoord[TEX_ROTATION].xy).r;
-        vec3  vrot      = vec3(cos(angle), sin(angle), 0.0);
+        vec3  vrot      = normalize(texture2D(rotationPattern, gl_TexCoord[TEX_ROTATION].xy).rgb);
         vec3  tangent   = normalize(vrot - normal*dot(vrot, normal));
         vec3  bitangent = cross(normal, tangent);
         mat3  tbnMatrix = mat3(tangent, bitangent, normal);
@@ -36,20 +36,18 @@ void main(void)
         for (int i = 0; i < NUMSAMPLES; i++) {
             // get point from sampling pattern rotated
             vec3 esSample  = tbnMatrix*samplingPattern[i];
-            if (dot(esSample, normal) < 0)
-                esSample = -esSample;
             esSample = radius*tbnMatrix*esSample + esCenter;
 
             // project point to screen space
             vec4 cspos = projectionMatrix * vec4(esSample.xy, -esSample.z, 1.0);
             vec2 sspos = (cspos.xy / cspos.w)*0.5 + 0.5;
 
-            // get depth and compare
-            float ssdepth      = zfar*texture2D(normalsDepth, sspos).a;
-            float insideRadius = abs(esCenter.z - ssdepth) < radius + zfar*EPSILON ? 1.0 : 0.0;
-
-            // consider occluders only inside the radius
-            occlusion += insideRadius * (ssdepth < esSample.z - zfar*EPSILON ? 1.0 : 0.0);
+            // get depth and compare, consider occluders only inside the radius and attenuate with distance
+            float ssdepth   = zfar*texture2D(normalsDepth, sspos).a;
+            float dd = (esSample.z - ssdepth - zfar*EPSILON)/(fadeoff*radius);
+            occlusion += (dd > 0.0 ? max(1.0 - 0.01*dd*dd, 0.0) : 0.0);
+            //float insideRadius = abs(esCenter.z - ssdepth) < radius + zfar*EPSILON ? 1.0 : 0.0;
+            //occlusion += insideRadius * (ssdepth < esSample.z - zfar*EPSILON ? 1.0 : 0.0);
         }
         occlusion /= float(NUMSAMPLES);
     }

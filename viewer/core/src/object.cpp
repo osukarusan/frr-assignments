@@ -124,7 +124,7 @@ void Object::computeVertexNormalsPerFace()
      return res;
  }
 
-    
+
 
 /*
 Lectura d'un fitxer OBJ
@@ -382,6 +382,9 @@ void read_mtllib( char **words, int nwords, const string& filename )
 
 void Object::readObj(const char* filename)
 {
+    char* locale = setlocale(LC_ALL, NULL);
+    setlocale(LC_NUMERIC, "C");
+
     MaterialLib* matlib = MaterialLib::instance();
 
     int currentMaterial = -1;  
@@ -459,6 +462,8 @@ void Object::readObj(const char* filename)
     }
     computeNormals();
     computeBoundingBox();
+
+    setlocale(LC_ALL, locale);
 }
 
 // Netela les dades de l'objecte 

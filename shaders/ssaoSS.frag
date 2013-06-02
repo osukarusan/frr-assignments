@@ -1,6 +1,6 @@
 #version 120
 
-const int NUMSAMPLES = 16;
+const int NUMSAMPLES = 32;
 const int TEX_DEFERRED = 0;
 const int TEX_ROTATION = 1;
 const float PI = 3.14159265;
@@ -12,6 +12,7 @@ uniform vec3      samplingPattern[NUMSAMPLES];
 
 uniform vec2      texelSize;
 uniform float     radius;
+uniform float     fadeoff;
 
 void main(void)
 {
@@ -35,9 +36,8 @@ void main(void)
             offset = depthRadius*texelSize*offset;
 
             float sampleDepth = texture2D(normalsDepth, texpos + offset).a;
-            if (sampleDepth >= depth - EPSILON) {
-                accum += 1.0;
-            }
+            float dd = sampleDepth - depth + EPSILON;
+            accum += (dd >= 0.0 ? 1.0 : min(50*fadeoff*dd*dd, 1.0));
         }
         accum /= float(NUMSAMPLES);
     }

@@ -12,9 +12,10 @@ RenderSSAO::RenderSSAO()
     frameBuffer1 = 0;
     frameBuffer2 = 0;
 
-    sampleMode = SCREEN_SPACE;
+    sampleMode = WORLD_SPACE;
     filterMode = BILATERAL_BLUR;
     sampleRadiusSize = 0.5f;
+    extinctionCoeff  = 1.0f;
     filterRadiusSize = 2.5f;
 }
 
@@ -86,11 +87,12 @@ void RenderSSAO::paintGL()
 
     programSSAO.setUniformValue("normalsDepth", 0);
     programSSAO.setUniformValue("rotationPattern", 1);
-    programSSAO.setUniformValueArray("samplingPattern", samplingPattern, 16);
+    programSSAO.setUniformValueArray("samplingPattern", samplingPattern, NUM_SAMPLES);
     programSSAO.setUniformValue("rotationRepetitions", pglwidget->width()/4.0f, pglwidget->height()/4.0f);
     programSSAO.setUniformValue("texelSize", 1.0f/pglwidget->width(), 1.0f/pglwidget->height());
     switch (sampleMode) {
-        case WORLD_SPACE:  programSSAO.setUniformValue("radius", 0.25f*sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
+        case WORLD_SPACE:  programSSAO.setUniformValue("radius",  0.2f*sampleRadiusSize*pglwidget->scene()->boundingBox().radius());
+                           programSSAO.setUniformValue("fadeoff", extinctionCoeff);
                            programSSAO.setUniformValue("zfar",pglwidget->camera()->getZfar());
                            programSSAO.setUniformValue("projectionMatrix",
                                                         QMatrix4x4( projmat[0], projmat[4], projmat[8],  projmat[12],
@@ -98,8 +100,10 @@ void RenderSSAO::paintGL()
                                                                     projmat[2], projmat[6], projmat[10], projmat[14],
                                                                     projmat[3], projmat[7], projmat[11], projmat[15]));
                            break;
-        case SCREEN_SPACE: programSSAO.setUniformValue("radius", 32.0f*sampleRadiusSize); break;
-        default:           programSSAO.setUniformValue("radius", 1.0f); break;
+        case SCREEN_SPACE: programSSAO.setUniformValue("radius", 32.0f*sampleRadiusSize);
+                           programSSAO.setUniformValue("fadeoff", extinctionCoeff);
+                           break;
+        default:           break;
     }
 
     glBegin(GL_QUADS);
@@ -171,6 +175,8 @@ void RenderSSAO::initGL()
 
 void RenderSSAO::resizeGL(int width, int height)
 {
+    std::cout << "Resize: " << width << "x" << height << std::endl;
+
     if (normaldepthTexture)
         glDeleteTextures(1, &normaldepthTexture);
     glGenTextures(1, &normaldepthTexture);
@@ -224,8 +230,8 @@ void RenderSSAO::resizeGL(int width, int height)
 
 
 void RenderSSAO::generateSamplingPattern() {
-    //float samples[16][3];
-    for (int i = 0; i < 16; i++) {
+    //float samples[NUM_SAMPLES][3];
+    for (int i = 0; i < NUM_SAMPLES; i++) {
         float x = (rand()%1024 - 512)/512.0f;
         float y = (rand()%1024 - 512)/512.0f;
         float z;
@@ -236,7 +242,7 @@ void RenderSSAO::generateSamplingPattern() {
         Vector vec(x, y, z);
         vec.normalize();
 
-        float scale = i/16.0f;
+        float scale = i/float(NUM_SAMPLES);
         scale = 0.1 + 0.9*scale*scale;
         vec *= scale;
 
@@ -251,15 +257,18 @@ void RenderSSAO::generateSamplingPattern() {
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, 16, 0, GL_RGB, GL_FLOAT, samples);*/
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGB, NUM_SAMPLES, 0, GL_RGB, GL_FLOAT, samples);*/
 }
 
 
 void RenderSSAO::generateRotationPattern() {
-    float rotation[4][4];
+
+    float *rotation = new float[4*4*3];
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
-            rotation[i][j] = (rand()%360)/360.0f;
+            rotation[i*4*3+j*3+0] = (rand()%1024 - 512)/512.0f;
+            rotation[i*4*3+j*3+1] = (rand()%1024 - 512)/512.0f;
+            rotation[i*4*3+j*3+2] = (rand()%1024 - 512)/512.0f;
         }
     }
 
@@ -269,7 +278,7 @@ void RenderSSAO::generateRotationPattern() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, 4, 4, 0, GL_LUMINANCE, GL_FLOAT, &rotation);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 4, 4, 0, GL_RGB, GL_FLOAT, rotation);
 }
 
 
@@ -280,10 +289,20 @@ void RenderSSAO::setSampleMode(SampleMode sm) {
 
 void RenderSSAO::setSampleRadiusSize(float r) {
     sampleRadiusSize = r;
+    std::cout << "Sample radius: " << sampleRadiusSize << std::endl;
+}
+
+void RenderSSAO::setExtinctionCoefficient(float c) {
+    if (c <= 0.5f)
+        extinctionCoeff = 0.1f + 0.9f*c/0.5f;
+    else
+        extinctionCoeff = 1.0f + (c - 0.5f)/0.5f;
+    std::cout << "Fadeoff coeff: " << extinctionCoeff << std::endl;
 }
 
 void RenderSSAO::setFilterRadiusSize(float r) {
     filterRadiusSize = 5.0f*r;
+    std::cout << "Filter radius: " << filterRadiusSize << std::endl;
 }
 
 void RenderSSAO::setFilterMode(FilterMode fm) {

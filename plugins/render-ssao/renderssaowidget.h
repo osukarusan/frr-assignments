@@ -31,6 +31,7 @@ private slots:
     void on_rbFilterBilateral_toggled(bool);
 
     void on_slFilterRadius_valueChanged(int);
+    void on_slExtinctionCoeff_valueChanged(int);
     void on_slSampleRadius_valueChanged(int);
 
 
